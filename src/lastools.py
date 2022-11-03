@@ -27,17 +27,24 @@ def _laz_to_las_conversion(laz_file, address, name):
     laz_file.write(do_compress=False, destination=Path(f'{address}') / f'{name}.las')
 
 
-def _df_to_las_conversion(df, address, name, las_version=(1, 4), las_format=7):
-    hdr = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]), point_format=PointFormat(las_format))
+def _df_to_las_conversion(df, address, name, las_version=(1, 4), las_format=7, data_columns=[]):
+    header = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]),
+                                    point_format=PointFormat(las_format))
     mins = np.floor(np.min(df[['x', 'y', 'z']].values, axis=1))
-    hdr.offset = mins
-    hdr.scale = [0.01, 0.01, 0.01]
-    outfile = laspy.file.File(Path(f'{address}') / f'{name}.las', mode="w", header=hdr)
+    header.offset = mins
+    header.scale = [0.01, 0.01, 0.01]
+    las = laspy.LasData(header)
+    for column in data_columns:
+        las[column] = df[column].values
+    las.write(str(Path(f'{address}') / f'{name}.las'))
+    print(f'The LAS file has been created at address {Path(address)}')
 
 
 if __name__ == '__main__':
     las_file = laspy.read('../data/ttlaz.laz')
-    # df = las_to_df(las_file)
+    df = las_to_df(las_file)
     # print(df)
     # _write_df_to_csv(df, '../data/', 'ttlaz')
-    _laz_to_las_conversion(las_file, '../data/', 'ttlas')
+    # _laz_to_las_conversion(las_file, '../data/', 'ttlas')
+    _df_to_las_conversion(df, address='../data/', name='ttlas2',
+                          data_columns=['X', 'Y', 'Z', 'intensity', 'classification'])
