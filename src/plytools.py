@@ -17,8 +17,6 @@ def _write_df_to_csv(df, name, address):
 
 
 if __name__ == '__main__':
-    # pcd = o3d.io.read_point_cloud('../data/test.ply')
-    # print(pcd)
     ply_data = PlyData.read('../data/test.ply')
     df = ply_to_df(ply_data)
     _write_df_to_csv(df, 'ttply', '../data/')
