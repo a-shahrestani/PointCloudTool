@@ -1,6 +1,6 @@
+import laspy
 import pandas as pd
 import numpy as np
-import laspy
 from pathlib import Path
 
 from laspy import PointFormat
@@ -13,36 +13,27 @@ _standard_classes = {'never classified': [0], 'unclassified': [1], 'ground': [2]
                      'wire-structure connector': [16]}
 
 
-def _las_to_df(las_file):
-    data = []
-    for column in list(las_file.point_format.dimension_names):
-        data.append(np.array(las_file[column]))
-    df = pd.DataFrame(np.array(data).T, columns=las_file.point_format.dimension_names)
-    return df
-
-
-def _write_df_to_csv(df, address, name):
+# converting the extracted point cloud data in the form of pandas dataframe into a CSV file
+def _write_df_to_csv(df: pd.DataFrame, address: str, name: str):
     df.to_csv(Path(f'{address}') / f'{name}.csv')
-
-
-def _las_to_laz_conversion(las_file, address, name):
-    las_file.write(do_compress=True, destination=Path(f'{address}') / f'{name}.laz')
-
-
-def _laz_to_las_conversion(laz_file, address, name):
-    laz_file.write(do_compress=False, destination=Path(f'{address}') / f'{name}.las')
 
 
 def _json_class_mapping(file):
     pass
 
 
-def _las_class_standardization(df: pd.DataFrame, classes_file=None, classes_json=None,
-                               classes=None) -> pd.DataFrame:
+def _las_class_standardization(df: pd.DataFrame, classes_file: str = None, classes_json: object = None,
+                               classes_dict: dict = None) -> pd.DataFrame:
+    if classes_dict is not None:
+        mapping_dict = {}
+        for key in classes_dict:
+            mapping_dict[classes_dict[key]] = _standard_classes[key]
+        df['classification'] = df['classification'].map(mapping_dict)
     return df
 
 
-def _df_intensity_reduction(df: pd.DataFrame, percentage=None, count=None) -> pd.DataFrame:
+# reducing the intensity of point cloud by dropping points at random based on a percentage of points or their count
+def _df_intensity_reduction(df: pd.DataFrame, percentage: int = None, count: int = None) -> pd.DataFrame:
     if percentage is not None:
         remove_n = len(df) // 100 * percentage
     elif count is not None:
@@ -54,7 +45,9 @@ def _df_intensity_reduction(df: pd.DataFrame, percentage=None, count=None) -> pd
     return df_subset
 
 
-def _df_to_las_conversion(df, address, name, las_version=(1, 4), las_format=7, data_columns=[]):
+def _df_to_las_conversion(df: pd.DataFrame, address: str, name: str, las_version: tuple = (1, 4), las_format: int = 7,
+                          data_columns:
+                          list[str] = []):
     header = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]),
                                     point_format=PointFormat(las_format))
     mins = np.floor(np.min(df[['X', 'Y', 'Z']].values, axis=0))
@@ -68,10 +61,6 @@ def _df_to_las_conversion(df, address, name, las_version=(1, 4), las_format=7, d
 
 
 if __name__ == '__main__':
-    las_file = laspy.read('../data/ttlaz.laz')
-    df = _las_to_df(las_file)
-    # print(df)
-    # _write_df_to_csv(df, '../data/', 'ttlaz')
-    # _laz_to_las_conversion(las_file, '../data/', 'ttlas')
-    _df_to_las_conversion(df, address='../data/', name='ttlas2',
-                          data_columns=['X', 'Y', 'Z', 'intensity', 'classification'])
+    test_classes = {'rail': 3, 'building': 1, 'water': 2}
+    df = _las_class_standardization(pd.read_csv('../data/testdf.csv'),classes_dict=test_classes)
+    print(df.classification)
