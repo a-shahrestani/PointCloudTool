@@ -27,8 +27,10 @@ def _las_class_standardization(df: pd.DataFrame, classes_file: str = None, class
     if classes_dict is not None:
         mapping_dict = {}
         for key in classes_dict:
-            mapping_dict[classes_dict[key]] = _standard_classes[key]
-        df['classification'] = df['classification'].map(mapping_dict)
+            mapping_dict[classes_dict[key]] = _standard_classes[key][0]
+        # this line of code maps the initial classes to the standard ones. If there is a missing class it will fill
+        # it with 1 which is the value for unclassified data
+        df['classification'] = df['classification'].map(mapping_dict).fillna(1)
     return df
 
 
@@ -62,5 +64,5 @@ def _df_to_las_conversion(df: pd.DataFrame, address: str, name: str, las_version
 
 if __name__ == '__main__':
     test_classes = {'rail': 3, 'building': 1, 'water': 2}
-    df = _las_class_standardization(pd.read_csv('../data/testdf.csv'),classes_dict=test_classes)
+    df = _las_class_standardization(pd.read_csv('../data/testdf.csv'), classes_dict=test_classes)
     print(df.classification)
