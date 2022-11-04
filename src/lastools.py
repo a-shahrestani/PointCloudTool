@@ -6,6 +6,12 @@ from pathlib import Path
 from laspy import PointFormat
 from laspy.header import Version
 
+_standard_classes = {'never classified': [0], 'unclassified': [1], 'ground': [2], 'low vegetation': [3],
+                     'medium vegetation': [4], 'high vegetation': [5], 'building': [6], 'low point': [7],
+                     'high point': [8], 'water': [9], 'rail': [10], 'road surface': [11], 'bridge deck': [12],
+                     'wire-guard': [13], 'wire-conductor': [14], 'transmission tower': [15],
+                     'wire-structure connector': [16], 'reserved': range(17, 63)}
+
 
 def las_to_df(las_file):
     data = []
@@ -27,10 +33,12 @@ def _laz_to_las_conversion(laz_file, address, name):
     laz_file.write(do_compress=False, destination=Path(f'{address}') / f'{name}.las')
 
 
+def _las_class_standardization(classes):
+    pass
 def _df_to_las_conversion(df, address, name, las_version=(1, 4), las_format=7, data_columns=[]):
     header = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]),
                                     point_format=PointFormat(las_format))
-    mins = np.floor(np.min(df[['x', 'y', 'z']].values, axis=1))
+    mins = np.floor(np.min(df[['X', 'Y', 'Z']].values, axis=0))
     header.offset = mins
     header.scale = [0.01, 0.01, 0.01]
     las = laspy.LasData(header)
