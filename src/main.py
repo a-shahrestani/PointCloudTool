@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 
 import laspy
 import pandas as pd
+from laspy import LaspyException
 from plyfile import PlyData
 
 _point_cloud_actions = {1: 'reduce intensity',
@@ -36,25 +38,35 @@ def _enter_file_address():
 
 def _read_las_file(state):
     address = _enter_file_address()
-    las_file = laspy.read(address)
-    return las_file, 10 * state
+    os.system('clear')
+    try:
+        las_file = laspy.read(address)
+    except OSError as e1:
+        print(f'No such file or directory: {address}')
+        print(f'Please enter a valid address')
+        return state
+    except LaspyException as e2:
+        print('The file you have chosen does not have a valid format. Please check your file and redo the operations')
+        return 1
+    return las_file, 2
 
 
 def _read_ply_file(state):
     address = _enter_file_address()
     ply_file = PlyData.read(address)
-    return ply_file, 10 * state
+    return ply_file, 2
 
 
 def _read_csv_file(state):
     address = _enter_file_address()
     csv_file = pd.read_csv(address)
-    return csv_file, 10 * state
+    return csv_file, 2
 
 
 def _initial_greetings(state):
     print('Welcome to the PointCloudTool!')
     state = _general_action_selection(state)
+    os.system('clear')
     return state
 
 
