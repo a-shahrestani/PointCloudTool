@@ -22,7 +22,7 @@ def _json_class_mapping(file):
     pass
 
 
-def _las_class_standardization(df: pd.DataFrame, classes_file: str = None, classes_json: object = None,
+def _las_class_asprs_standardization(df: pd.DataFrame, classes_file: str = None, classes_json: object = None,
                                classes_dict: dict = None) -> pd.DataFrame:
     if classes_dict is not None:
         mapping_dict = {}
@@ -34,8 +34,8 @@ def _las_class_standardization(df: pd.DataFrame, classes_file: str = None, class
     return df
 
 
-# reducing the intensity of point cloud by dropping points at random based on a percentage of points or their count
-def _df_intensity_reduction(df: pd.DataFrame, percentage: int = None, count: int = None) -> pd.DataFrame:
+# reducing the density of point cloud by dropping points at random based on a percentage of points or their count
+def _df_density_reduction(df: pd.DataFrame, percentage: int = None, count: int = None) -> pd.DataFrame:
     if percentage is not None:
         remove_n = len(df) // 100 * percentage
     elif count is not None:
@@ -46,23 +46,26 @@ def _df_intensity_reduction(df: pd.DataFrame, percentage: int = None, count: int
     df_subset = df.drop(drop_indices)
     return df_subset
 
-
-def _df_to_las_conversion(df: pd.DataFrame, address: str, name: str, las_version: tuple = (1, 4), las_format: int = 7,
-                          data_columns:
-                          list[str] = []):
+def _df_to_ply_conversion(df: pd.DataFrame, address: str):
+    pass
+def _df_to_las_conversion(df: pd.DataFrame, address: str, las_version: tuple = (1, 4), las_format: int = 7,
+                          compress = True,
+                          data_columns:list[str] = []):
     header = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]),
                                     point_format=PointFormat(las_format))
     mins = np.floor(np.min(df[['X', 'Y', 'Z']].values, axis=0))
+    if len(data_columns) < 1:
+        data_columns = df.columns
     header.offset = mins
     header.scale = [0.01, 0.01, 0.01]
     las = laspy.LasData(header)
     for column in data_columns:
         las[column] = df[column].values
-    las.write(str(Path(f'{address}') / f'{name}.las'))
-    print(f'The LAS file has been created at address {Path(address)}')
+    las.write(str(Path(f'{address}')),do_compress=compress)
+    print(f'The file has been created at address {Path(address)}')
 
 
 if __name__ == '__main__':
     test_classes = {'rail': 3, 'building': 1, 'water': 2}
-    df = _las_class_standardization(pd.read_csv('../data/testdf.csv'), classes_dict=test_classes)
+    df = _las_class_asprs_standardization(pd.read_csv('../data/testdf.csv'), classes_dict=test_classes)
     print(df.classification)

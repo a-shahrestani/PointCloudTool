@@ -23,11 +23,13 @@ def _las_to_laz_conversion(las_file: laspy.LasData, address: str, name: str, do_
 
 
 if __name__ == '__main__':
-    las_file = laspy.read('../data/ttlas3.las')
+    las_file = laspy.read('../../datasets/Tile 1 2.laz')
     df = _las_to_df(las_file)
     # df = pd.read_csv('../data/testdf.csv')
     print(df)
+    print(df.columns)
     # _write_df_to_csv(df, '../data/', 'ttlaz')
     # _laz_to_las_conversion(las_file, '../data/', 'ttlas')
     # _df_to_las_conversion(df, address='../data/', name='ttlas3',
     #                       data_columns=['X', 'Y', 'Z', 'intensity', 'classification'])
+

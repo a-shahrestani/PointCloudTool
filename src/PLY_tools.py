@@ -15,5 +15,6 @@ def _ply_to_df(ply_file: PlyData) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    ply_data = PlyData.read('../data/test.ply')
+    ply_data = PlyData.read('../../datasets/Lille2.ply')
     df = _ply_to_df(ply_data)
+    print(df)
