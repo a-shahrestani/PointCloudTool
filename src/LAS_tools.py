@@ -8,9 +8,11 @@ from src.manipulation_tools import _df_to_las_conversion
 
 def _las_to_df(las_file: laspy.LasData) -> pd.DataFrame:
     data = []
-    for column in list(las_file.point_format.dimension_names):
+    columns = list(las_file.point_format.dimension_names)
+    columns[:3] = ['x','y','z']
+    for column in columns:
         data.append(np.array(las_file[column]))
-    df = pd.DataFrame(np.array(data).T, columns=las_file.point_format.dimension_names)
+    df = pd.DataFrame(np.array(data).T, columns=columns)
     return df
 
 

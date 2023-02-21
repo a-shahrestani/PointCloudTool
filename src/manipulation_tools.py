@@ -53,7 +53,7 @@ def _df_to_las_conversion(df: pd.DataFrame, address: str, las_version: tuple = (
                           data_columns:list[str] = []):
     header = laspy.header.LasHeader(version=Version(las_version[0], las_version[1]),
                                     point_format=PointFormat(las_format))
-    mins = np.floor(np.min(df[['X', 'Y', 'Z']].values, axis=0))
+    mins = np.floor(np.min(df[['x', 'y', 'z']].values, axis=0))
     if len(data_columns) < 1:
         data_columns = df.columns
     header.offset = mins

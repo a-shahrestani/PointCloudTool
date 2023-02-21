@@ -38,7 +38,7 @@ def _enter_file_address():
 
 def _read_las_file(state):
     address = _enter_file_address()
-    os.system('clear')
+    os.system('cls')
     try:
         las_file = laspy.read(address)
     except OSError as e1:
@@ -66,17 +66,17 @@ def _read_csv_file(state):
 def _initial_greetings(state):
     print('Welcome to the PointCloudTool!')
     state = _general_action_selection(state)
-    os.system('clear')
+    os.system('cls')
     return state
 
 
 def _point_cloud_action_selection(state):
-    point_cloud_actions = {1: 'reduce intensity',
+    point_cloud_actions = {1: 'reduce density',
                            2: 'export CSV',
                            3: 'export LAZ',
                            4: 'export LAS',
                            5: 'export PLY',
-                           6: 'standardize the classes'}
+                           6: 'ASPRS standardize the classes'}
     print(f'What are you looking to do: \n')
     for action in point_cloud_actions.items():
         print(f'{str(action[0])}. {str(action[1])}')
@@ -87,6 +87,8 @@ def _point_cloud_action_selection(state):
     else:
         return state * 10 + int(command)
 
+def _export_csv(state):
+    pass
 
 if __name__ == '__main__':
     stage = 1
@@ -94,10 +96,23 @@ if __name__ == '__main__':
         if stage == 1:  # initial command
             stage = _initial_greetings(stage)
         elif stage == 11:  # read LAS
-            stage = _read_las_file(stage)
+            data, stage = _read_las_file(stage)
         elif stage == 12:  # read PLY
-            stage = _read_ply_file(stage)
+            data, stage = _read_ply_file(stage)
         elif stage == 13:  # read CSV
-            stage = _read_csv_file(stage)
+            data, stage = _read_csv_file(stage)
         elif stage == 2:  # point cloud command
             stage = _point_cloud_action_selection(stage)
+        elif stage == 21:  # reduce density
+            pass
+        elif stage == 22:  # export CSV
+            pass
+        elif stage == 23:  # export LAZ
+            pass
+        elif stage == 24:  # export LAS
+            pass
+        elif stage == 25:  # export PLY
+            pass
+        elif stage == 26:  # ASPRS standardize the classes
+            pass
+
